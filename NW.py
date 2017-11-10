@@ -3,6 +3,7 @@
 #print "\tLooking at primer "+primer
 seq = 'GGTTGATGACAGGGCAGCTACACAGCCCATTTCGAGAGAGAGAGAGATACCTTTTATAT'
 seq = 'GGTTGATGACAAAGCAGCTACACAGCCCATTTCGAGAGAGAGAGAGATACCTTTTATAT'
+seq = "CCCAGGTCTCGGTCA-GACCAGGCCTCCCG"
 #seq = 'GGTTGATGACAGGGCAGCTACACAGAGTGTGAGCCCATTTCGAGAGAGAGAGAGATACCTTTTATAT' 
 primer = "GGACACCTACACAGCCCAT"	
 #primer = "GGACACCTACCCCACAGCCCAT"
@@ -28,7 +29,7 @@ for x in range(len(seq)+1):
 	T.append([0]*(len(primer)+1))
 #Walk through the matrices, starting at position 1,1
 #and proceding row by row, left to right/top to bottom, assigning a score.
-for y in range(1,len(primer)+1):
+for y in range(1,len(primer)):
 	for x in range(1,len(seq)+1):
 		if seq[x-1] == primer[y-1]:#See if it's a match
 		#Set this cell equal to the best possible score out of three options:
@@ -49,6 +50,14 @@ for y in range(1,len(primer)+1):
 				T[x][y] = 2
 			else:
 				T[x][y] = 3
+#For the final column, we will enforce a match at the 3' end of the primer sequence.
+for x in range(1,len(seq)+1):
+    if seq[x-1] == primer[-2]:
+        S[x][-1] = max(S[x-1][-1]+gap,S[x][-2]+gap,S[x-1][-2] + matchscore)
+        if S[x][-1] == S[x-1][-2] + matchscore:
+            T[x][-1] = 1
+    else:
+        S[x][-1] = -99 #This should be low enough to never be the best score.
 #Find the maximum score in the last row and last column and set the rest of the remaining matrix in the last row/column to that number, this lets you have trailing gaps
 #(instead of just starting in the bottom right hand corner like in a "usual" NW aligner)
 lastColumn = []
@@ -121,9 +130,9 @@ print stringS+" <- stringS doesn't get returned what is this"
 print stringP+" <- stringP doesn't get returned what is this"
 #print "\t\t"+sP #was commented out in actual program
 print "\t\t\t\t\t\t\t\t"+str(score)+"\t"+str(max_score)+"\t"+str(distance_from_max)+"<- distance from maximum score\t" #was commented out in actual program
-print len(primer)-S[-1][-1] #was commented out in actual program
+print len(primer)-score #was commented out in actual program
 print len(primer) #was commented out in actual program
-print S[-1][-1] #was commented out in actual program
+print score #was commented out in actual program
 print
 print
 #	return(aligned_s, aligned_p, score)
